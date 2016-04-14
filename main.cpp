@@ -4,7 +4,8 @@
 #include <algorithm>
 #include <iomanip>
 
-struct block{
+struct block 
+{
 	int rows;
 	int cols;
 	std::vector<double> v;
@@ -32,6 +33,18 @@ struct block{
 	      double f = -e(j,i)/ e(i,i);
 	      add_rows(i,j,f);
 	    }	  
+	  }
+	}
+	template <class Iter>
+	void bwd(Iter xb, Iter xe)
+	{
+	  //int edgesz = cols - rows - 1;
+	  for(int i=rows-1; i >= 0; --i){
+	    auto cb = begin(v) + i*cols + rows;
+	    double scp = std::inner_product(xb,xe,cb,0.0);
+	    std::cout << scp << '\n';
+	    e(i,cols-1) -= scp;
+	    e(i,cols-1) /= e(i,i);
 	  }
 	}
 	void add_rows(int i, int j, double f)
@@ -75,5 +88,11 @@ int main()
   b.fill();
   std::cout << b << '\n';
   b.fwd();
+  std::cout << b << '\n';
+  
+  std::vector<double> x(3, 1.0);
+
+  b.bwd(begin(x), end(x));
+  
   std::cout << b << '\n';
 }
