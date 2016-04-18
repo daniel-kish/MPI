@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "block.h"
+#include "Row.h"
 #include <queue>
 
 int get_row_no(int block_no, int block_sz, int cols, int row_len)
@@ -9,18 +10,6 @@ int get_row_no(int block_no, int block_sz, int cols, int row_len)
 	return block_no*block_sz + cols - row_len;
 }
 
-struct Row {
-	std::vector<double> data;
-	int row_no;
-	Row(std::vector<double>&& rowdata, int _row_no)
-		: data(std::move(rowdata)), row_no(_row_no)
-	{	}
-};
-
-bool operator<(Row const& lhs, Row const& rhs)
-{
-	return lhs.row_no > rhs.row_no;
-}
 
 enum tag { block_tag, block_row_tag, edge_sol_tag, block_sol_tag };
 
@@ -36,7 +25,7 @@ int main(int argc, char** argv)
 		
 		// sending block
 		std::vector<double> v{ 1,2,9,8,3,9,5,2, 3,3,5,4,3,7,5,5, 9,1,1,3,3,5,4,8, 7,2,3,1,8,1,3,1 };
-		block b(4,3);
+		Block b(4,3);
 		b.v = v;
 		assert(v.size() == b.v.size());
 
@@ -59,11 +48,12 @@ int main(int argc, char** argv)
 		
 		q.push( Row(std::move(row), row_no) );
 		
-		std::cout << "got row# " << row_no << '\n';
+		std::cout << "got row# " << q.top().row_no << '\n';
 		for(int i=0; i < q.top().data.size(); ++i)
 			std::cout << q.top().data[i] << ' ';
 		std::cout << '\n';
 		q.pop();
+		
 		//receiving second row
 		MPI_Probe(1, block_row_tag, MPI_COMM_WORLD, &status);
 		MPI_Get_count(&status, MPI_DOUBLE, &row_len);
@@ -72,7 +62,7 @@ int main(int argc, char** argv)
 		
 		row_no = get_row_no(0, 4, b.cols, row_len);
 		q.push( Row(std::move(row), row_no) );
-		std::cout << "got row# " << row_no << '\n';
+		std::cout << "got row# " << q.top().row_no << '\n';
 		for(int i=0; i < q.top().data.size(); ++i)
 			std::cout << q.top().data[i] << ' ';
 		std::cout << '\n';
@@ -84,7 +74,7 @@ int main(int argc, char** argv)
 		MPI_Get_count(&status, MPI_DOUBLE, &count);
 	
 		
-		block b(4,3);
+		Block b(4,3);
 		std::vector<double> v(count);
 		MPI_Recv(v.data(), count, MPI_DOUBLE, 0, block_tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		b.v = v;

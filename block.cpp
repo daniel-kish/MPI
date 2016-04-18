@@ -1,26 +1,26 @@
 #include "block.h"
 
 
-block::block(int blocksz, int edgesz)
+Block::Block(int blocksz, int edgesz)
 		: rows(blocksz), cols(blocksz + edgesz + 1), v(rows*cols)
 {}
 
-double& block::operator()(int i, int j)
+double& Block::operator()(int i, int j)
 {
 	return v[i*cols + j];
 }
 
-double block::operator()(int i, int j) const
+double Block::operator()(int i, int j) const
 {
 	return v[i*cols + j];
 }
 
-double& block::e(int i, int j)
+double& Block::e(int i, int j)
 {
 	return v[i*cols + j];
 }
 
-void block::fwd(int i)
+void Block::fwd(int i)
 {
 	assert(i >= 0 && i < rows);
 	for (int j = i + 1; j < rows; ++j)
@@ -30,7 +30,7 @@ void block::fwd(int i)
 	}
 }
 
-void block::bwd(std::vector<double> & x)
+void Block::bwd(std::vector<double> & x)
 {
 	eliminateEdge(begin(x), end(x));
 
@@ -46,7 +46,7 @@ void block::bwd(std::vector<double> & x)
 	}
 }
 
-void block::eliminateEdge(iter xb, iter xe)
+void Block::eliminateEdge(iter xb, iter xe)
 {
 	for (int i = rows-1; i >= 0; --i) {
 		auto cb = begin(v) + i*cols + rows;
@@ -55,7 +55,7 @@ void block::eliminateEdge(iter xb, iter xe)
 	}
 }
 
-void block::add_rows(int i, int j, double f)
+void Block::add_rows(int i, int j, double f)
 {
 	for (int m = 0; m < cols; ++m)
 	{
@@ -63,14 +63,14 @@ void block::add_rows(int i, int j, double f)
 	}
 }
 
-void block::fill()
+void Block::fill()
 {
 	std::mt19937 g{ 5 };
 	std::uniform_real_distribution<double> d(1, 5);
 	std::generate(begin(v), end(v), [&]() { return d(g); });
 }
 
-std::ostream& operator<<(std::ostream& s, block const& b)
+std::ostream& operator<<(std::ostream& s, Block const& b)
 {
 	int blocksz = b.rows;
 	int edgesz = b.cols - b.rows - 1;

@@ -9,13 +9,13 @@
 #include <assert.h>
 
 typedef std::vector<double>::iterator iter;
-struct block
+struct Block
 {
 	int rows;
 	int cols;
 	std::vector<double> v;
 
-	block(int blocksz, int edgesz);
+	Block(int blocksz, int edgesz);
 	double& operator()(int i, int j);
 	double operator()(int i, int j) const;
 	double& e(int i, int j);
@@ -27,7 +27,7 @@ struct block
 	void fill();
 };
 
-std::ostream& operator<<(std::ostream& s, block const& b);
+std::ostream& operator<<(std::ostream& s, Block const& b);
 
 
 #endif //BLOCK_H
