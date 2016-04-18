@@ -1,9 +1,13 @@
 #include "Row.h"
 
-Row::Row(std::vector<double>&& rowdata, int _row_no)
-		: v(std::move(rowdata)), row_no(_row_no)
+Row::Row(double* rowdata, int _row_no, int cols)
+		: v(rowdata), row_no(_row_no), sz(cols-row_no)
 {	}
 
+Row::~Row()
+{
+	delete [] v;
+}
 
 bool operator<(Row const& lhs, Row const& rhs)
 {
@@ -14,8 +18,8 @@ std::ostream& operator<< (std::ostream& s, Row const& r)
 {
 	s << r.row_no << ": ";
 	
-	for(const auto& e : r.v)
-		s << e << ' ';
+	for(int i=0; i < r.sz; ++i)
+		s << r.v[i] << ' ';
 		
 	return s;
 }

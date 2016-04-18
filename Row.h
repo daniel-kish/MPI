@@ -2,9 +2,11 @@
 #include <iostream>
 
 struct Row {
-	std::vector<double> v;
+	double* v;
 	int row_no;
-	Row(std::vector<double>&& rowdata, int _row_no);
+	int sz;
+	Row(double* rowdata, int _row_no, int cols);
+	~Row();
 };
 
 

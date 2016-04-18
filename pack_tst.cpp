@@ -1,74 +1,81 @@
 #include "mpi.h"
 #include <iostream>
 #include "Row.h"
+#include "Block.h"
+#include "Dispatcher.h"
+#include "BlockWorker.h"
+#include <assert.h>
+#include <sstream>
 #define SIZE 4
 
+
+// pars: <prog> block_sz blocks_nr edge_sz 
 int main(int argc, char *argv[])  
 {
-	int numtasks, rank;
-	double a[SIZE][SIZE] =
-	  {1.0,  2.0,  3.0,  4.0,
-	   5.0,  6.0,  7.0,  8.0,
-	   9.0,  10.0, 11.0, 12.0,
-	   13.0, 14.0, 15.0, 16.0};
+	const int block_sz  = atoi(argv[1]);
+	const int blocks_nr = atoi(argv[2]);
+	const int edge_sz   = atoi(argv[3]);
+	
+	MPI_Init(&argc, &argv);
+	
+	int myrank, world_sz;
+	
+	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+	MPI_Comm_size(MPI_COMM_WORLD, &world_sz);
 
-	MPI_Init(&argc,&argv);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
-
-	if (rank == 0)
-	{
-		int row_no = 1;
-		
-		MPI_Aint addr_row_no, addr_row_data, disp[2];
-		
-		MPI_Get_address(&row_no, &addr_row_no);
-		MPI_Get_address(&a[1][1], &addr_row_data);
-		disp[0] = (MPI_Aint) 0;
-		disp[1] = addr_row_data - addr_row_no;
-		
-		MPI_Datatype row_type;
-		int blocks[2] = {1,SIZE-row_no};
-		MPI_Datatype types[2]={MPI_INT, MPI_DOUBLE};
-		
-		MPI_Type_create_struct(2, blocks, disp, types, &row_type);
-		MPI_Type_commit(&row_type);
-		
-		MPI_Request req;
-		MPI_Isend(&row_no, 1, row_type, 1, 0, MPI_COMM_WORLD, &req);
-		
-		std::cout << "sent and out\n";
-		
-		MPI_Type_free(&row_type);
+	if (myrank == 0) {
+		Dispatcher d(block_sz,blocks_nr,edge_sz);
+		d.work();
+		std::cout << "exiting " << myrank << '\n';
 	}
-	else
-	{		
-		std::vector<char> buf;
-		MPI_Status status;
-		
-		MPI_Probe(0, 0, MPI_COMM_WORLD, &status);
-		
-		int elems;
-		
-		MPI_Get_elements(&status, MPI_PACKED, &elems); // size in bytes
-		
-		std::cout << "elems " << elems << '\n';
-		buf.resize(elems);
-		MPI_Recv(buf.data(), buf.size(), MPI_PACKED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		
-		int pos=0;
-		int row_no=-1;
+	else {
+		BlockWorker bw(block_sz,blocks_nr,edge_sz);
+		bw.work();
+		std::cout << "exiting " << myrank << '\n';
+/*		MPI_Datatype block_type;
+		const int fields_nr = 3;
 
-		MPI_Unpack(buf.data(), buf.size(), &pos, &row_no, 1, MPI_INT, MPI_COMM_WORLD);
-		
-		std::vector<double> row_data; row_data.resize(SIZE-row_no);
-		
-		MPI_Unpack(buf.data(), buf.size(), &pos, row_data.data(), row_data.size(), MPI_DOUBLE, MPI_COMM_WORLD);
-		
+		Block b(block_sz, edge_sz);
+		MPI_Datatype field_types[fields_nr] = { MPI_INT, MPI_INT, MPI_DOUBLE };
+		int field_len[fields_nr] = { 1, 1, b.v.size() };
+		MPI_Aint disp[fields_nr], addr_rows, addr_cols, addr_data;
 
-		Row r(std::move(row_data), row_no);
-		std::cout << r << '\n';
-	}
+		MPI_Get_address(&b.rows, &addr_rows);
+		MPI_Get_address(&b.cols, &addr_cols);
+		MPI_Get_address(b.v.data(), &addr_data);
+
+		disp[0] = 0; 						// rows
+		disp[1] = addr_cols - addr_rows;	// cols
+		disp[2] = addr_data - addr_rows;	// data [rows x cols] doubles
+
+		MPI_Type_create_struct(fields_nr, field_len, disp, field_types, &block_type);
+		MPI_Type_commit(&block_type);
+
+		MPI_Recv(&b.rows, 1, block_type, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+		MPI_Type_free(&block_type);
+		std::ostringstream s;
+		s << myrank << ":\n" << b << '\n';
+		std::cout.write(s.str().c_str(),s.str().size());
+*/	}
 	
 	MPI_Finalize();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
