@@ -3,6 +3,7 @@
 
 #include <mpi.h>
 #include "Block.h"
+#include "Row.h"
 
 struct DispatcherError{
 	std::string msg;
@@ -24,6 +25,7 @@ struct Dispatcher
 	void work();
 	void dispatchBlocks();
 	void send_block(Block const&,int);
+	Row recv_row();
 };
 
 #endif //DISPATCHER_H

@@ -31,12 +31,12 @@ try{
 	if (myrank == 0) {
 		Dispatcher d(block_sz,blocks_nr,edge_sz);
 		d.work();
-		std::cout << "exiting " << myrank << '\n';
+		//std::cout << "exiting " << myrank << '\n';
 	}
 	else {
 		BlockWorker bw(block_sz,blocks_nr,edge_sz);
 		bw.work();
-		std::cout << "exiting " << myrank << '\n';
+		//std::cout << "exiting " << myrank << '\n';
 	}
 	
 	MPI_Finalize();
