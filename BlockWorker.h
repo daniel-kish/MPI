@@ -1,5 +1,16 @@
+#ifndef BLOCKWORKER_H
+#define BLOCKWORKER_H
+
+
 #include <mpi.h>
 #include "Block.h"
+
+struct BlockWorkerError{
+	std::string msg;
+	BlockWorkerError(std::string s) : msg(s)
+	{}
+	std::string what() {return msg;}
+};
 
 
 struct BlockWorker
@@ -15,3 +26,5 @@ struct BlockWorker
 	void work();
 	Block recv_block();
 };
+
+#endif //BLOCKWORKER

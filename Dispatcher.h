@@ -1,6 +1,16 @@
+#ifndef DISPATCHER_H
+#define DISPATCHER_H
+
 #include <mpi.h>
 #include "Block.h"
-enum tag { block_tag };
+
+struct DispatcherError{
+	std::string msg;
+	DispatcherError(std::string s) : msg(s)
+	{}
+	std::string what() {return msg;}
+};
+
 
 struct Dispatcher
 {
@@ -15,3 +25,5 @@ struct Dispatcher
 	void dispatchBlocks();
 	void send_block(Block const&,int);
 };
+
+#endif //DISPATCHER_H

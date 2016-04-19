@@ -2,18 +2,14 @@
 #include <string>
 #include <sstream>
 
-struct BlockWorkerError{
-	std::string msg;
-	BlockWorkerError(std::string s) : msg(s)
-	{}
-	std::string what() {return msg;}
-};
-
 BlockWorker::BlockWorker(int _block_sz, int _blocks_nr, int _edge_sz)
 	: block_sz(_block_sz), blocks_nr(_blocks_nr), edge_sz(_edge_sz)
 {
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 	MPI_Comm_size(MPI_COMM_WORLD, &world_sz);
+	
+	if (world_sz-1 != blocks_nr) // not enough or too many processes
+		throw BlockWorkerError("not enough processes");
 }
 
 void BlockWorker::work()
