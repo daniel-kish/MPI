@@ -52,16 +52,15 @@ void Dispatcher::dispatchBlocks()
 
 	for(int rank = 1; rank < world_sz; ++rank)
 	{
-		Block b(block_sz, edge_sz); b.v = dataBlocks[rank-1];
-		send_block(b,rank);
+		send_block(dataBlocks[rank-1],rank);
 	}
 	
 }
 
 
-void Dispatcher::send_block(Block const& b, int dest_rank)
+void Dispatcher::send_block(std::vector<double> & v, int dest_rank)
 {
-	MPI_Datatype block_type;
+/*	MPI_Datatype block_type;
 	const int fields_nr = 3;
 	
 	MPI_Datatype field_types[fields_nr] = { MPI_INT, MPI_INT, MPI_DOUBLE };
@@ -82,6 +81,8 @@ void Dispatcher::send_block(Block const& b, int dest_rank)
 	MPI_Send(&b.rows, 1, block_type, dest_rank, 0, MPI_COMM_WORLD);
 	
 	MPI_Type_free(&block_type);
+*/
+	MPI_Send(v.data(), v.size(), MPI_DOUBLE, dest_rank, 0, MPI_COMM_WORLD);
 }
 
 Row Dispatcher::recv_row()

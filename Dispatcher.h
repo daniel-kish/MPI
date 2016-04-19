@@ -24,7 +24,7 @@ struct Dispatcher
 	Dispatcher(int block_sz, int blocks_nr, int edge_sz);
 	void work();
 	void dispatchBlocks();
-	void send_block(Block const&,int);
+	void send_block(std::vector<double> &,int);
 	Row recv_row();
 };
 

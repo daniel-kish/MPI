@@ -17,10 +17,7 @@ void BlockWorker::work()
 {
 	Block b = recv_block();
 
-/*	std::ostringstream s;
-	s << myrank << ":\n" << b << '\n';
-	std::cout.write(s.str().c_str(),s.str().size());
-*/	MPI_Request* reqs = new MPI_Request[b.rows];
+	MPI_Request* reqs = new MPI_Request[b.rows];
 
 	for(int i = 0; i < b.rows; ++i)
 	{
@@ -29,11 +26,13 @@ void BlockWorker::work()
 	}
 	
 	MPI_Waitall(b.rows, reqs, MPI_STATUS_IGNORE);
+	
+	
 }
 
 Block BlockWorker::recv_block()
 {
-	MPI_Datatype block_type;
+/*	MPI_Datatype block_type;
 	const int fields_nr = 3;
 
 	Block b(block_sz, edge_sz);
@@ -56,6 +55,10 @@ Block BlockWorker::recv_block()
 
 	MPI_Type_free(&block_type);
 	
+*/
+	Block b(block_sz, edge_sz);
+	MPI_Recv(b.v.data(), b.v.size(), MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
 	return b;
 }
 
