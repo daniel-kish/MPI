@@ -27,7 +27,7 @@ void Edge::eliminate_col(Row& r)
 	int block_no = r.row_no / block_sz;
 	int block_last_col = block_sz*(block_no+1);
 	
-	std::cout << "b_no " << block_no << " blc " << block_last_col << '\n';
+//	std::cout << "b_no " << block_no << " blc " << block_last_col << '\n';
 	
 	for(int i = 0; i < rows; ++i)
 	{

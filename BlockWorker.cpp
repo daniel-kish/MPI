@@ -26,8 +26,6 @@ void BlockWorker::work()
 	}
 	
 	MPI_Waitall(b.rows, reqs, MPI_STATUS_IGNORE);
-	
-	
 }
 
 Block BlockWorker::recv_block()

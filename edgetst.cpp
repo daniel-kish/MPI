@@ -4,8 +4,8 @@
 
 void fill_row(Row & r)
 {
-//	std::vector<double> data{ 1,2,9,8,3,9,5,2 };
-	std::vector<double> data{ 8,2,6,2,4 };
+	std::vector<double> data{ 1,2,9,8,3,9,5,2 };
+//	std::vector<double> data{ 8,2,6,2,4 };
 	for(int i=0; i < data.size(); ++i)
 		r.v[i] = data[i];
 }
@@ -19,7 +19,7 @@ int main()
 	Edge e(3,3,4);
 	e.v = edata;
 	
-	Row r(5,6);
+	Row r(8,0);
 	fill_row(r);
 
 	e.eliminate_col(r);

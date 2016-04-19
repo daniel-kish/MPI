@@ -1,5 +1,7 @@
 #include "Dispatcher.h"
 #include "Block.h"
+#include "Edge.h"
+#include "Row.h"
 #include <string>
 #include <sstream>
 #include <queue>
@@ -7,13 +9,25 @@
 
 
 Dispatcher::Dispatcher(int _block_sz, int _blocks_nr, int _edge_sz)
-	: block_sz(_block_sz), blocks_nr(_blocks_nr), edge_sz(_edge_sz)
+	: block_sz(_block_sz), blocks_nr(_blocks_nr), edge_sz(_edge_sz),
+	  edge(_edge_sz, _blocks_nr, block_sz)
 {
 	MPI_Comm_size(MPI_COMM_WORLD, &world_sz);
 	
 	if (world_sz-1 != blocks_nr) // not enough or too many processes
 		throw DispatcherError("not enough processes");
 
+	std::vector<double> edata {
+		 1, 2, 2, 4, 6, 7, 1, 4, 8, 4, 8, 5, 3, 6, 8, 4,
+		 2, 3, 8, 2, 6, 1, 6, 9, 4, 4, 7, 3, 9, 7, 0, 3,
+		 4, 3, 0, 7, 0, 5, 4, 7, 4, 8, 7, 5, 8, 7, 1, 7  };
+	edge.v = edata;
+}
+
+void Dispatcher::elim_row(Row & r, int& col_last_elimd)
+{
+	edge.eliminate_col(r);
+	col_last_elimd = r.row_no; // col_last_elimd++;
 }
 
 void Dispatcher::work()
@@ -22,19 +36,49 @@ void Dispatcher::work()
 	std::priority_queue<Row> q;
 	
 	int rows_nr = blocks_nr * block_sz;
-	while (q.size() < rows_nr)
+	int col_last_elimd=-1;
+	
+	std::cout << "rows_nr = " << rows_nr << '\n'; 
+	int total_recved = 0;
+	while (col_last_elimd < rows_nr-1) // while elimn's not over
+	{
+		std::cout << "enter cycle " << col_last_elimd << '\n';
+		if (!q.empty() && q.top().row_no - col_last_elimd == 1) {
+			std::cout << "q top needed\n";
+			Row r = q.top(); q.pop();
+			std::cout << "using " << r.row_no << '\n';
+			elim_row(r,col_last_elimd);	
+			std::cout << "q.pop()\n";
+		}
+		if(total_recved < rows_nr){
+			q.push(recv_row()); 
+			total_recved++;
+		}
+	}
+	
+	std::cout << edge << '\n';
+
+	if (!q.empty()) {
+		std::cerr << "fatal error: q not empty\n";
+		std::terminate();
+	}
+/*	while (q.size() < rows_nr)
 	{
 		Row r = recv_row();
 		std::cout << r << '\n';
 		q.push(r);
 	}
+*/	
 	
-	std::cout << "q contents:\n";
+	
+	
+/*	std::cout << "q contents:\n";
 	while (!q.empty())
 	{
 		Row r = q.top(); q.pop();
 		std::cout << r << '\n';
 	}
+*/
 }
 
 void Dispatcher::dispatchBlocks()
@@ -94,9 +138,9 @@ Row Dispatcher::recv_row()
 	int row_no;
 	int pos=0;
 	MPI_Unpack(b,10000,&pos,&row_no,1,MPI_INT,MPI_COMM_WORLD);
-	std::cout << "got " << row_no <<" from " << status.MPI_SOURCE << '\n';
 	
 	int g_row_no = (status.MPI_SOURCE-1)*block_sz + row_no;
+	std::cout << "got " << g_row_no <<" from " << status.MPI_SOURCE << '\n';
 	int row_data_sz = block_sz+edge_sz+1-row_no;
 	Row r(row_data_sz, g_row_no);
 	

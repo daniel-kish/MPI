@@ -1,3 +1,6 @@
+#ifndef EDGE_H
+#define EDGE_H
+
 #include <vector>
 #include <iostream>
 #include <iomanip>
@@ -26,3 +29,5 @@ struct Edge
 };
 
 std::ostream& operator<<(std::ostream& s, Edge const& b);
+
+#endif // EDGE_H
