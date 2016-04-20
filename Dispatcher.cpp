@@ -36,12 +36,12 @@ void Dispatcher::work()
 	std::priority_queue<Row> q;
 	
 	int rows_nr = blocks_nr * block_sz;
-	int col_tobe_elimd=0;
+	int col_tobe_elimd = 0;
 	int total_recved = 0;
-	
+
 	while(col_tobe_elimd < rows_nr) // elimn is not over
 	{
-		if(!q.empty() && q.top().row_no == col_tobe_elimd) {  // needed row is in queue
+		while(!q.empty() && q.top().row_no == col_tobe_elimd) {  // needed row is in queue
 			Row r = q.top(); q.pop();
 			elim_row(r,col_tobe_elimd);
 		}
@@ -51,7 +51,7 @@ void Dispatcher::work()
 			total_recved++;
 			if (r.row_no == col_tobe_elimd) // immediate usage
 				elim_row(r,col_tobe_elimd);	
-			else 							// keep for future
+			else	// keep for future
 				q.push(r);
 		}
 	}
