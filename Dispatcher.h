@@ -27,6 +27,8 @@ struct Dispatcher
 	void dispatchBlocks();
 	void send_block(std::vector<double> &,int);
 	void elim_row(Row&, int&);
+	void send_edge_sol();
+	void recv_block_sols();
 	Row recv_row();
 };
 

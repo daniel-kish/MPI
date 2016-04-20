@@ -11,7 +11,7 @@ struct Edge
 	std::vector<double> v;
 	int rows;
 	int cols;
-	std::vector<double> edgeSoln;
+	std::vector<double> edge_soln;
 	int block_sz;
 	int blocks_nr;
 	int edge_sz;

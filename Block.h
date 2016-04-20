@@ -14,6 +14,7 @@ struct Block
 	int rows;
 	int cols;
 	std::vector<double> v;
+	std::vector<double> sol;
 
 	Block(int blocksz, int edgesz);
 	double& operator()(int i, int j);

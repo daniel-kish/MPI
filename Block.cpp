@@ -33,7 +33,7 @@ void Block::fwd(int i)
 void Block::bwd(std::vector<double> & x)
 {
 	eliminateEdge(begin(x), end(x));
-
+	sol.resize(rows);
 	for (int i = rows - 1; i >= 0; --i) // every row
 	{
 		double s = 0.0;
@@ -43,6 +43,7 @@ void Block::bwd(std::vector<double> & x)
 		}
 		e(i, cols - 1) -= s;
 		e(i, cols - 1) /= e(i, i);
+		sol[i] = e(i, cols - 1);
 	}
 }
 

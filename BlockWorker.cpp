@@ -26,6 +26,17 @@ void BlockWorker::work()
 	}
 	
 	MPI_Waitall(b.rows, reqs, MPI_STATUS_IGNORE);
+	std::vector<double> v = recv_edge_sol();
+	
+	b.bwd(v);
+		
+	send_block_sol(b);
+}
+
+void BlockWorker::send_block_sol(Block& b)
+{
+	MPI_Send(b.sol.data(), b.sol.size(), MPI_DOUBLE,
+		0, 3, MPI_COMM_WORLD);
 }
 
 Block BlockWorker::recv_block()
@@ -86,7 +97,13 @@ void BlockWorker::send_row(Block & b, int row_no, MPI_Request* req)
 	MPI_Isend(&row_no, 1, row_type, 0, 1, MPI_COMM_WORLD, req);
 
 	MPI_Type_free(&row_type);
-//	std::cout << myrank << " sent " << g_row_no << ':' << row_data_sz << '\n';
+}
+
+std::vector<double> BlockWorker::recv_edge_sol()
+{
+	std::vector<double> v(edge_sz);
+	MPI_Bcast(v.data(), v.size(), MPI_DOUBLE,0,MPI_COMM_WORLD);
+	return v;
 }
 
 

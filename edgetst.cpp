@@ -25,6 +25,9 @@ int main()
 	e.bwd();
 	
 	std::cout << e << '\n';	
+	
+	for(int i=0; i < e.edge_soln.size(); ++i)
+		std::cout << e.edge_soln[i] << '\n';
 }
 
 

@@ -55,7 +55,6 @@ void Dispatcher::work()
 				q.push(r);
 		}
 	}
-	std::cout << edge << '\n';
 
 	// just in case
 	if (!q.empty()) {
@@ -64,9 +63,26 @@ void Dispatcher::work()
 	}
 	
 	edge.fwd();
-	std::cout << edge << '\n';
 	edge.bwd();
-	std::cout << edge << '\n';
+
+	send_edge_sol();
+	recv_block_sols();
+}
+
+void Dispatcher::recv_block_sols()
+{
+	std::vector<double> soln(block_sz*blocks_nr + edge_sz);
+
+	for (int rank = 1; rank < world_sz; rank++)
+	{
+		MPI_Recv(soln.data()+(rank-1)*block_sz, block_sz, MPI_DOUBLE,
+		 rank, 3, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	}
+	int last = blocks_nr*block_sz;
+	for(int i=last; i < soln.size(); ++i)
+		soln[i] = edge.edge_soln[i-last];
+	for (int i=0; i < soln.size(); ++i)
+		std::cout << soln[i] << '\n';
 }
 
 void Dispatcher::dispatchBlocks()
@@ -124,7 +140,7 @@ Row Dispatcher::recv_row()
 	MPI_Recv(b, 10000, MPI_PACKED, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &status);
 	
 	int row_no;
-	int pos=0;
+	int pos = 0;
 	MPI_Unpack(b,10000,&pos,&row_no,1,MPI_INT,MPI_COMM_WORLD);
 	
 	int g_row_no = (status.MPI_SOURCE-1)*block_sz + row_no;
@@ -172,6 +188,17 @@ Row Dispatcher::recv_row()
 	return r;
 */
 }
+
+void Dispatcher::send_edge_sol()
+{
+	MPI_Bcast(edge.edge_soln.data(), edge.edge_soln.size(), MPI_DOUBLE,0,MPI_COMM_WORLD);
+}
+
+
+
+
+
+
 
 
 

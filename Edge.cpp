@@ -45,39 +45,32 @@ void Edge::fwd()
 {
 	int subcols = edge_sz+1;
 	int j0 = block_sz*blocks_nr;
-	
-	std::cout << j0 << "r " << rows << '\n';
-	
+		
 	for(int p = 0; p < rows-1; ++p)
 	{
 		for(int r = p+1; r < rows; ++r)
 		{
 			double f = -e(r,p+j0)/e(p,j0+p);
-			std::cout << e(r,p+j0) << ' ' << e(p,j0+p) << ';';
 			for (int k=p; k < subcols; k++)
 			{
 				e(r,k+j0) = e(r, k+j0) + f*e(p,k+j0);
 			}
 		}
-		std::cout << '\n';
 	}
 }
 
 void Edge::bwd()
 {
 	int j0 = block_sz*blocks_nr;
+	edge_soln.resize(edge_sz);
 	for (int i = rows - 1; i >= 0; --i) // every row
 	{
-		//std::cout << e(i, cols-1) << '\n';
 		double s=0.0;
 		for (int j = cols-2; j-j0!=i; --j)
-		{	
 			s += e(i,j)*e(j-j0,cols-1);
-//			std::cout << e(i,j) << '*' << e(j-j0,cols-1) << '\n';
-		}
 		e(i,cols-1) -= s;
 		e(i,cols-1) /= e(i,i+j0);
-		std::cout << '\n';
+		edge_soln[i] = e(i,cols-1);
 	}
 }
 
