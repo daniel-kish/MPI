@@ -3,7 +3,7 @@
 Edge::Edge(int _edge_sz, int _blocks_num, int _block_sz)
 	: v( _edge_sz*(_blocks_num*_block_sz + _edge_sz + 1) ), 
 	  rows(_edge_sz), cols(_blocks_num*_block_sz + _edge_sz + 1), 
-	  block_sz(_block_sz), edge_sz(_edge_sz)
+	  block_sz(_block_sz), blocks_nr(_blocks_num), edge_sz(_edge_sz)
 {	}
 
 double& Edge::operator()(int i, int j)
@@ -27,8 +27,6 @@ void Edge::eliminate_col(Row& r)
 	int block_no = r.row_no / block_sz;
 	int block_last_col = block_sz*(block_no+1);
 	
-//	std::cout << "b_no " << block_no << " blc " << block_last_col << '\n';
-	
 	for(int i = 0; i < rows; ++i)
 	{
 		double f = -e(i, elimd_col) / r.v[0];
@@ -41,6 +39,52 @@ void Edge::eliminate_col(Row& r)
 		for (; n < edge_sz+1; rj--, ej--, n++)
 			e(i,ej) = e(i,ej) + f*r.v[rj];
 	}
+}
+
+void Edge::fwd()
+{
+	int subcols = edge_sz+1;
+	int j0 = block_sz*blocks_nr;
+	
+	std::cout << j0 << "r " << rows << '\n';
+	
+	for(int p = 0; p < rows-1; ++p)
+	{
+		for(int r = p+1; r < rows; ++r)
+		{
+			double f = -e(r,p+j0)/e(p,j0+p);
+			std::cout << e(r,p+j0) << ' ' << e(p,j0+p) << ';';
+			for (int k=p; k < subcols; k++)
+			{
+				e(r,k+j0) = e(r, k+j0) + f*e(p,k+j0);
+			}
+		}
+		std::cout << '\n';
+	}
+}
+
+void Edge::bwd()
+{
+	int j0 = block_sz*blocks_nr;
+	for (int i = rows - 1; i >= 0; --i) // every row
+	{
+		//std::cout << e(i, cols-1) << '\n';
+		double s=0.0;
+		for (int j = cols-2; j-j0!=i; --j)
+		{	
+			s += e(i,j)*e(j-j0,cols-1);
+//			std::cout << e(i,j) << '*' << e(j-j0,cols-1) << '\n';
+		}
+		e(i,cols-1) -= s;
+		e(i,cols-1) /= e(i,i+j0);
+		std::cout << '\n';
+	}
+}
+
+void Edge::solveEdgeEqs()
+{
+	fwd();
+	bwd();
 }
 
 std::ostream& operator<<(std::ostream& s, Edge const& e)

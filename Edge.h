@@ -13,6 +13,7 @@ struct Edge
 	int cols;
 	std::vector<double> edgeSoln;
 	int block_sz;
+	int blocks_nr;
 	int edge_sz;
 	
 	Edge(int edgesz, int blocks_num, int blocksz);
@@ -24,8 +25,9 @@ struct Edge
 	
 	// soln
 	void eliminate_col(Row& r);
-	bool elimDone();
 	void solveEdgeEqs();
+	void fwd();
+	void bwd();
 };
 
 std::ostream& operator<<(std::ostream& s, Edge const& b);

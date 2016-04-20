@@ -62,6 +62,11 @@ void Dispatcher::work()
 		std::cerr << "fatal error: q not empty\n";
 		std::terminate();
 	}
+	
+	edge.fwd();
+	std::cout << edge << '\n';
+	edge.bwd();
+	std::cout << edge << '\n';
 }
 
 void Dispatcher::dispatchBlocks()
