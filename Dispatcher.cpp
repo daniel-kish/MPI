@@ -24,10 +24,10 @@ Dispatcher::Dispatcher(int _block_sz, int _blocks_nr, int _edge_sz)
 	edge.v = edata;
 }
 
-void Dispatcher::elim_row(Row & r, int& col_last_elimd)
+void Dispatcher::elim_row(Row & r, int& col_tobe_elimd)
 {
 	edge.eliminate_col(r);
-	col_last_elimd = r.row_no; // col_last_elimd++;
+	col_tobe_elimd++;
 }
 
 void Dispatcher::work()
@@ -36,49 +36,32 @@ void Dispatcher::work()
 	std::priority_queue<Row> q;
 	
 	int rows_nr = blocks_nr * block_sz;
-	int col_last_elimd=-1;
-	
-	std::cout << "rows_nr = " << rows_nr << '\n'; 
+	int col_tobe_elimd=0;
 	int total_recved = 0;
-	while (col_last_elimd < rows_nr-1) // while elimn's not over
+	
+	while(col_tobe_elimd < rows_nr) // elimn is not over
 	{
-		std::cout << "enter cycle " << col_last_elimd << '\n';
-		if (!q.empty() && q.top().row_no - col_last_elimd == 1) {
-			std::cout << "q top needed\n";
+		if(!q.empty() && q.top().row_no == col_tobe_elimd) {  // needed row is in queue
 			Row r = q.top(); q.pop();
-			std::cout << "using " << r.row_no << '\n';
-			elim_row(r,col_last_elimd);	
-			std::cout << "q.pop()\n";
+			elim_row(r,col_tobe_elimd);
 		}
-		if(total_recved < rows_nr){
-			q.push(recv_row()); 
+		if (total_recved < rows_nr)	// not all rows are recved yet
+		{
+			Row r = recv_row();
 			total_recved++;
+			if (r.row_no == col_tobe_elimd) // immediate usage
+				elim_row(r,col_tobe_elimd);	
+			else 							// keep for future
+				q.push(r);
 		}
 	}
-	
 	std::cout << edge << '\n';
 
+	// just in case
 	if (!q.empty()) {
 		std::cerr << "fatal error: q not empty\n";
 		std::terminate();
 	}
-/*	while (q.size() < rows_nr)
-	{
-		Row r = recv_row();
-		std::cout << r << '\n';
-		q.push(r);
-	}
-*/	
-	
-	
-	
-/*	std::cout << "q contents:\n";
-	while (!q.empty())
-	{
-		Row r = q.top(); q.pop();
-		std::cout << r << '\n';
-	}
-*/
 }
 
 void Dispatcher::dispatchBlocks()
@@ -140,7 +123,6 @@ Row Dispatcher::recv_row()
 	MPI_Unpack(b,10000,&pos,&row_no,1,MPI_INT,MPI_COMM_WORLD);
 	
 	int g_row_no = (status.MPI_SOURCE-1)*block_sz + row_no;
-	std::cout << "got " << g_row_no <<" from " << status.MPI_SOURCE << '\n';
 	int row_data_sz = block_sz+edge_sz+1-row_no;
 	Row r(row_data_sz, g_row_no);
 	
