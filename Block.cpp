@@ -66,8 +66,9 @@ void Block::add_rows(int i, int j, double f)
 
 void Block::fill()
 {
-	std::mt19937 g{ 5 };
-	std::uniform_real_distribution<double> d(1, 5);
+	std::random_device rd;
+	std::mt19937 g{ rd() };
+	std::uniform_real_distribution<double> d(-1, 1);
 	std::generate(begin(v), end(v), [&]() { return d(g); });
 }
 

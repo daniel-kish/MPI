@@ -28,6 +28,7 @@ struct Edge
 	void solveEdgeEqs();
 	void fwd();
 	void bwd();
+	void fill();
 };
 
 std::ostream& operator<<(std::ostream& s, Edge const& b);
