@@ -76,10 +76,11 @@ void Dispatcher::recv_block_sols()
 	for (int rank = 1; rank < world_sz; rank++)
 	{
 		MPI_Recv(soln.data()+(rank-1)*block_sz, block_sz, MPI_DOUBLE,
-		 rank, 3, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		 rank, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 	}
+	
 	int last = blocks_nr*block_sz;
-	for(int i=last; i < soln.size(); ++i)
+	for (int i=last; i < soln.size(); ++i)
 		soln[i] = edge.edge_soln[i-last];
 	for (int i=0; i < soln.size(); ++i)
 		std::cout << soln[i] << '\n';

@@ -2,32 +2,46 @@
 #include "Block.h"
 #include "Edge.h"
 
-std::vector<double> mult(std::vector<Block> const& blocks,
+std::vector<double> mult(std::vector<Block> const& bs,
 						 Edge const& e, std::vector<double> x)
 {
-	std::vector<double> res;
-	int rows = blocks[0].rows;
-	int b=0;
-	for(int r=0; r < rows; ++r)
+	int b_rows = bs[0].rows;
+	int e_rows = e.rows;
+	int bs_nr = bs.size();
+	
+	std::vector<double> res(x.size());
+	std::cout << res.size() << '\n';
+
+	
+	for (int b=0; b < bs_nr; ++b)
 	{
-		double s = 0.0;
+		int b_beg = b*b_rows;
+		int b_end = (b+1)*b_rows;
 		
-		int i;
-		for (i = 0; i < rows; ++i)
+		for (int r=0; r < b_rows; ++r)
 		{
-			std::cout << blocks[b](r,i) << ' ' << x[i] << "; ";
-			//s += blocks[b](0,i) * x[i]
-		} // first part
+			double s=0.0;
+			for (int gc = b_beg; gc != b_end; ++gc)
+			{
+				std::cout << bs[b](r, gc-b_beg) << ':' << x[gc] << ' ';
+				s += bs[b](r, gc-b_beg) * x[gc];
+			}
+			std::cout << " | ";
 		
-		int i0 = rows*blocks.size();
-		
-		for (int j=0; j+i0 < x.size(); ++i,++j)
-		{
-			std::cout << blocks[b](r,i) << ' ' << x[j+i0] << "; ";
-			//s += blocks[b](0,i) * x[i+i0];
-		} // second part
-		std::cout << '\n';
+			int e_end = bs[b].cols-2;
+			int times = e.rows;
+
+			for(int i = e_end, j=x.size()-1; times > 0; times--,i--,j--)
+			{
+				std::cout << bs[b](r,i) << ':' << x[j] << ' ';
+				s += bs[b](r,i) * x[j];
+			}
+			res[r + b_rows*b] = s;
+			std::cout << '\n';
+		}
 	}
+	
+	
 	return res;
 }
 
@@ -60,5 +74,25 @@ int main()
 
 	std::cout << e; 
 */
-	mult(blocks,e,x);
+	std::vector<double> v = mult(blocks,e,x);
+	for(int i=0; i < v.size(); ++i)
+		std::cout << v[i] << '\n';
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
