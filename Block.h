@@ -16,6 +16,7 @@ struct Block
 	std::vector<double> v;
 	std::vector<double> sol;
 
+	Block();
 	Block(int blocksz, int edgesz);
 	double& operator()(int i, int j);
 	double operator()(int i, int j) const;

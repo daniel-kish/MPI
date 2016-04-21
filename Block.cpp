@@ -1,5 +1,8 @@
 #include "Block.h"
 
+Block::Block()
+		: rows(0), cols(0)
+{}
 
 Block::Block(int blocksz, int edgesz)
 		: rows(blocksz), cols(blocksz + edgesz + 1), v(rows*cols)

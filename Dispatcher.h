@@ -21,11 +21,15 @@ struct Dispatcher
 	int edge_sz;
 	int world_sz;
 	Edge edge;
+	Edge edgeInit;
+	std::vector<Block> bs;
+	std::vector<double> soln;
+	std::vector<double> Rhs;
 
 	Dispatcher(int block_sz, int blocks_nr, int edge_sz);
 	void work();
 	void dispatchBlocks();
-	void send_block(std::vector<double> &,int);
+	void send_block(Block &,int);
 	void elim_row(Row&, int&);
 	void send_edge_sol();
 	void recv_block_sols();
