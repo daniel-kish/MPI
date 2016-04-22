@@ -7,6 +7,7 @@
 #include <sstream>
 #include <queue>
 #include <algorithm>
+//#include <chrono>
 
 
 Dispatcher::Dispatcher(int _block_sz, int _blocks_nr, int _edge_sz)
@@ -37,6 +38,7 @@ void Dispatcher::elim_row(Row & r, int& col_tobe_elimd)
 void Dispatcher::work()
 {
 	dispatchBlocks();
+	std::cout << "dispatched blocks\n";
 	
 	std::priority_queue<Row> q;
 	
@@ -66,12 +68,20 @@ void Dispatcher::work()
 		std::cerr << "fatal error: q not empty\n";
 		std::terminate();
 	}
-	
+	std::cout << "recved rows\n";
+
 	edge.fwd();
 	edge.bwd();
+	
+	std::cout << "solved edge\n";
 
 	send_edge_sol();
+	
+	std::cout << "sent edge sol\n";
+	
 	recv_block_sols();
+	
+	std::cout << "recved block solns\n";
 		
 	std::cout << "\n\n";
 	std::vector<double> rhs = mult(bs, edgeInit, soln);
@@ -160,19 +170,43 @@ void Dispatcher::send_block(Block & b, int dest_rank)
 
 Row Dispatcher::recv_row()
 {
-	static char b[10000];
 	MPI_Status status;
-	MPI_Recv(b, 10000, MPI_PACKED, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &status);
+	MPI_Probe(MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &status);
+	int pack_sz;
+	int src_rank = status.MPI_SOURCE;
+	
+	MPI_Get_count(&status, MPI_PACKED, &pack_sz);
+	
+//	std::cout <<"probe: from "<< src_rank <<' '<< pack_sz << '\n';
+	
+	char * b = new char[pack_sz];
+	
+	if(b == 0)
+	{
+		throw DispatcherError("not enough memory\n");
+	}
+	
+	MPI_Recv(b, pack_sz, MPI_PACKED, src_rank, 1, MPI_COMM_WORLD, &status);
+	
+//	std::cout <<"recved\n";
 	
 	int row_no;
 	int pos = 0;
-	MPI_Unpack(b,10000,&pos,&row_no,1,MPI_INT,MPI_COMM_WORLD);
+	MPI_Unpack(b,pack_sz,&pos,&row_no,1,MPI_INT,MPI_COMM_WORLD);
 	
-	int g_row_no = (status.MPI_SOURCE-1)*block_sz + row_no;
-	int row_data_sz = block_sz+edge_sz+1-row_no;
+//	std::cout << "got " << row_no << ':';
+	
+	int g_row_no = (src_rank-1)*block_sz + row_no;
+	int row_data_sz = block_sz + edge_sz + 1 - row_no;
 	Row r(row_data_sz, g_row_no);
 	
-	MPI_Unpack(b, 10000, &pos, r.v, row_data_sz, MPI_DOUBLE, MPI_COMM_WORLD);
+	if (r.v == 0)
+		throw DispatcherError("not enough memory for Row\n"); 
+	
+	MPI_Unpack(b, pack_sz, &pos, r.v, r.sz, MPI_DOUBLE, MPI_COMM_WORLD);
+	
+	delete [] b;
+//	std::cout << r.sz << " from " << src_rank << '\n';
 	return r;
 
 
