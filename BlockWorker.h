@@ -25,7 +25,7 @@ struct BlockWorker
 	BlockWorker(int block_sz, int blocks_nr, int edge_sz);
 	void work();
 	Block recv_block();
-	void send_row(Block &,int,MPI_Request*);
+	void send_row(Block &,int/*,MPI_Request**/);
 	std::vector<double> recv_edge_sol();
 	void send_block_sol(Block&);
 };
