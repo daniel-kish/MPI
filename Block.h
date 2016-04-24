@@ -22,6 +22,7 @@ struct Block
 	double operator()(int i, int j) const;
 	double& e(int i, int j);
 	void fwd(int);
+	void fwd();
 	void bwd(std::vector<double> & x);
 
 	void eliminateEdge(iter xb, iter xe);

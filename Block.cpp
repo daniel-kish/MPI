@@ -23,6 +23,12 @@ double& Block::e(int i, int j)
 	return v[i*cols + j];
 }
 
+void Block::fwd()
+{
+	for (int i=0; i < rows; ++i)
+		fwd(i);
+}
+
 void Block::fwd(int i)
 {
 	assert(i >= 0 && i < rows);
