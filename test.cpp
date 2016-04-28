@@ -1,5 +1,5 @@
 #include "test.h"
-#include <random>
+//#include <random>
 #include <algorithm>
 
 std::vector<double> mult(std::vector<Block> const& bs,
@@ -47,10 +47,12 @@ std::vector<double> mult(std::vector<Block> const& bs,
 	return res;
 }
 
+double rand_d()
+{
+  return ((double)rand()/(double)RAND_MAX);  
+}
+
 void fill(std::vector<double>& v)
 {
-	std::random_device rd;
-	std::mt19937 g{ rd() };
-	std::uniform_real_distribution<double> d(-1, 1);
-	std::generate(begin(v), end(v), [&]() { return d(g); });
+	std::generate(v.begin(), v.end(), rand_d);
 }

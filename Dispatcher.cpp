@@ -7,6 +7,7 @@
 #include <sstream>
 #include <queue>
 #include <algorithm>
+#include <cstdlib>
 //#include <chrono>
 
 
@@ -88,7 +89,7 @@ void Dispatcher::work()
 	
 	double residue=0.0;
 	for (int i=0; i < rhs.size(); ++i)
-		residue += std::abs(rhs[i] - Rhs[i]);
+		residue += abs(rhs[i] - Rhs[i]);
 	std::cout << residue << '\n';
 }
 
@@ -110,7 +111,7 @@ void Dispatcher::recv_block_sols()
 void Dispatcher::dispatchBlocks()
 {
 	bs.resize(blocks_nr);
-	fill(begin(bs), end(bs), Block(block_sz, edge_sz));
+	fill(bs.begin(), bs.end(), Block(block_sz, edge_sz));
 /*	std::vector< std::vector<double> > dataBlocks;
 	dataBlocks.push_back(
 	  std::vector<double>{ 1,2,9,8,3,9,5,2, 3,3,5,4,3,7,5,5, 9,1,1,3,3,5,4,8, 7,2,3,1,8,1,3,1 }

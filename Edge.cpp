@@ -1,5 +1,6 @@
 #include "Edge.h"
-#include <random>
+#include "test.h"
+//#include <random>
 #include <algorithm>
 
 Edge::Edge(int _edge_sz, int _blocks_num, int _block_sz)
@@ -97,10 +98,10 @@ std::ostream& operator<<(std::ostream& s, Edge const& e)
 
 void Edge::fill()
 {
-	std::random_device rd;
-	std::mt19937 g{ rd() };
-	std::uniform_real_distribution<double> d(-1, 1);
-	std::generate(begin(v), end(v), [&]() { return d(g); });
+//	std::random_device rd;
+//	std::mt19937 g{ rd() };
+//	std::uniform_real_distribution<double> d(-1, 1);
+	std::generate(v.begin(), v.end(), rand_d);
 }
 
 
