@@ -1,6 +1,7 @@
 #include "BlockWorker.h"
 #include <string>
 #include <sstream>
+#include <ctime>
 
 BlockWorker::BlockWorker(int _block_sz, int _blocks_nr, int _edge_sz)
 	: block_sz(_block_sz), blocks_nr(_blocks_nr), edge_sz(_edge_sz)
@@ -15,22 +16,20 @@ BlockWorker::BlockWorker(int _block_sz, int _blocks_nr, int _edge_sz)
 
 void BlockWorker::work()
 {
-	Block b = recv_block();
+	Block bl = recv_block();
 
-//	MPI_Request* reqs = new MPI_Request[b.rows];
+//	MPI_Request* reqs = new MPI_Request[b.rows];	
 
-	for(int i = 0; i < b.rows; ++i)
+	for(int i = 0; i < bl.rows; ++i)
 	{
-		send_row(b,i/*,reqs+i*/);
-		b.fwd(i);
+		send_row(bl,i/*,reqs+i*/);
+		bl.fwd(i);
 	}
-	
 //	MPI_Waitall(b.rows, reqs, MPI_STATUS_IGNORE);
 	std::vector<double> v = recv_edge_sol();
-	
-	b.bwd(v);
-		
-	send_block_sol(b);
+
+	bl.bwd(v);
+	send_block_sol(bl);
 }
 
 void BlockWorker::send_block_sol(Block& b)

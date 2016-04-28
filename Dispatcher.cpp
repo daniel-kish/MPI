@@ -8,6 +8,8 @@
 #include <queue>
 #include <algorithm>
 #include <cstdlib>
+#include <ctime>
+#include <cmath>
 //#include <chrono>
 
 
@@ -47,6 +49,10 @@ void Dispatcher::work()
 	int col_tobe_elimd = 0;
 	int total_recved = 0;
 
+	double total_time=0.0;
+	clock_t start, end;
+
+	start = clock();
 	while(col_tobe_elimd < rows_nr) // elimn is not over
 	{
 		while(!q.empty() && q.top().row_no == col_tobe_elimd) {  // needed row is in queue
@@ -57,12 +63,16 @@ void Dispatcher::work()
 		{
 			Row r = recv_row();
 			total_recved++;
-			if (r.row_no == col_tobe_elimd) // immediate usage
-				elim_row(r,col_tobe_elimd);	
+			if (r.row_no == col_tobe_elimd) { // immediate usage
+				elim_row(r,col_tobe_elimd);
+			}
 			else	// keep for future
 				q.push(r);
 		}
 	}
+
+	end = clock();
+	total_time += double((end - start)) / CLOCKS_PER_SEC;
 
 	// just in case
 	if (!q.empty()) {
@@ -71,8 +81,12 @@ void Dispatcher::work()
 	}
 	std::cout << "recved rows\n";
 
+	start = clock();
 	edge.fwd();
 	edge.bwd();
+	end = clock();
+	total_time += double((end - start)) / CLOCKS_PER_SEC;
+
 	
 	std::cout << "solved edge\n";
 
@@ -80,16 +94,20 @@ void Dispatcher::work()
 	
 	std::cout << "sent edge sol\n";
 	
+	start = clock();
 	recv_block_sols();
+	end = clock();
+	total_time += double((end - start)) / CLOCKS_PER_SEC;
 	
-	std::cout << "recved block solns\n";
+	std::cout << "elapsed " << total_time << '\n';
+	//std::cout << "recved block solns\n";
 		
 	std::cout << "\n\n";
 	std::vector<double> rhs = mult(bs, edgeInit, soln);
 	
 	double residue=0.0;
 	for (int i=0; i < rhs.size(); ++i)
-		residue += abs(rhs[i] - Rhs[i]);
+		residue += fabs(rhs[i] - Rhs[i]);
 	std::cout << residue << '\n';
 }
 
