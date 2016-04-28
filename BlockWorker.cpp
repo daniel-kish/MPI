@@ -71,6 +71,7 @@ Block BlockWorker::recv_block()
 	return b;
 }
 
+// FIXME TODO: make it asynchronous
 void BlockWorker::send_row(Block & b, int _row_no/*, MPI_Request* req*/)
 {
 	int row_no = _row_no;

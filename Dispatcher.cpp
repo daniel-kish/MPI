@@ -168,6 +168,7 @@ void Dispatcher::send_block(Block & b, int dest_rank)
 	MPI_Send(b.v.data(), b.v.size(), MPI_DOUBLE, dest_rank, 0, MPI_COMM_WORLD);
 }
 
+// FIXME TODO: make it asynchronous
 Row Dispatcher::recv_row()
 {
 	MPI_Status status;
@@ -186,13 +187,13 @@ Row Dispatcher::recv_row()
 		throw DispatcherError("not enough memory\n");
 	}
 	
-	MPI_Recv(b, pack_sz, MPI_PACKED, src_rank, 1, MPI_COMM_WORLD, &status);
+	MPI_Recv(b,pack_sz, MPI_PACKED, src_rank, 1, MPI_COMM_WORLD, &status);
 	
 //	std::cout <<"recved\n";
 	
 	int row_no;
 	int pos = 0;
-	MPI_Unpack(b,pack_sz,&pos,&row_no,1,MPI_INT,MPI_COMM_WORLD);
+	MPI_Unpack(b, pack_sz, &pos, &row_no, 1, MPI_INT, MPI_COMM_WORLD);
 	
 //	std::cout << "got " << row_no << ':';
 	
@@ -250,7 +251,7 @@ Row Dispatcher::recv_row()
 
 void Dispatcher::send_edge_sol()
 {
-	MPI_Bcast(edge.edge_soln.data(), edge.edge_soln.size(), MPI_DOUBLE,0,MPI_COMM_WORLD);
+	MPI_Bcast(edge.edge_soln.data(), edge.edge_soln.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
 }
 
 
