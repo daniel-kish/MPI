@@ -1,4 +1,5 @@
 #include "Block.h"
+#include "test.h"
 
 Block::Block()
 		: rows(0), cols(0)
@@ -41,7 +42,7 @@ void Block::fwd(int i)
 
 void Block::bwd(std::vector<double> & x)
 {
-	eliminateEdge(begin(x), end(x));
+	eliminateEdge(x.begin(),x.end());
 	sol.resize(rows);
 	for (int i = rows - 1; i >= 0; --i) // every row
 	{
@@ -59,7 +60,7 @@ void Block::bwd(std::vector<double> & x)
 void Block::eliminateEdge(iter xb, iter xe)
 {
 	for (int i = rows-1; i >= 0; --i) {
-		auto cb = begin(v) + i*cols + rows;
+		std::vector<double>::iterator cb = v.begin() + i*cols + rows;
 		double scp = std::inner_product(xb, xe, cb, 0.0);
 		e(i, cols - 1) -= scp;
 	}
@@ -75,10 +76,10 @@ void Block::add_rows(int i, int j, double f)
 
 void Block::fill()
 {
-	std::random_device rd;
-	std::mt19937 g{ rd() };
-	std::uniform_real_distribution<double> d(-1, 1);
-	std::generate(begin(v), end(v), [&]() { return d(g); });
+//	std::random_device rd;
+//	std::mt19937 g{ rd() };
+//	std::uniform_real_distribution<double> d(-1, 1);
+	std::generate(v.begin(), v.end(), rand_d);
 }
 
 std::ostream& operator<<(std::ostream& s, Block const& b)

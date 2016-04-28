@@ -1,7 +1,7 @@
+#include <mpi.h>
 #ifndef DISPATCHER_H
 #define DISPATCHER_H
 
-#include <mpi.h>
 #include "Block.h"
 #include "Edge.h"
 #include "Row.h"
