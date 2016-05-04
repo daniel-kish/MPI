@@ -10,7 +10,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
-//#include <chrono>
 
 
 Dispatcher::Dispatcher(int _block_sz, int _blocks_nr, int _edge_sz)
@@ -18,41 +17,34 @@ Dispatcher::Dispatcher(int _block_sz, int _blocks_nr, int _edge_sz)
 	  edge(_edge_sz, _blocks_nr, block_sz), edgeInit(edge)
 {
 	MPI_Comm_size(MPI_COMM_WORLD, &world_sz);
-	
 	if (world_sz-1 != blocks_nr) // not enough or too many processes
 		throw DispatcherError("not enough processes");
-
-/*	std::vector<double> edata {
-		 1, 2, 2, 4, 6, 7, 1, 4, 8, 4, 8, 5, 3, 6, 8, 4,
-		 2, 3, 8, 2, 6, 1, 6, 9, 4, 4, 7, 3, 9, 7, 0, 3,
-		 4, 3, 0, 7, 0, 5, 4, 7, 4, 8, 7, 5, 8, 7, 1, 7  };
-	edge.v = edata;
-*/
 	edge.fill();
 	edgeInit = edge;
 }
 
 void Dispatcher::elim_row(Row & r, int& col_tobe_elimd)
 {
+	clock_t st = clock();
 	edge.eliminate_col(r);
 	col_tobe_elimd++;
+	clock_t fin = clock();
+	time += double((fin - st)) / CLOCKS_PER_SEC;
 }
 
 void Dispatcher::work()
 {
 	dispatchBlocks();
 	std::cout << "dispatched blocks\n";
-	
 	std::priority_queue<Row> q;
 	
 	int rows_nr = blocks_nr * block_sz;
 	int col_tobe_elimd = 0;
 	int total_recved = 0;
 
-	double total_time=0.0;
+	time = 0.0;
 	clock_t start, end;
 
-	start = clock();
 	while(col_tobe_elimd < rows_nr) // elimn is not over
 	{
 		while(!q.empty() && q.top().row_no == col_tobe_elimd) {  // needed row is in queue
@@ -71,8 +63,6 @@ void Dispatcher::work()
 		}
 	}
 
-	end = clock();
-	total_time += double((end - start)) / CLOCKS_PER_SEC;
 
 	// just in case
 	if (!q.empty()) {
@@ -85,7 +75,7 @@ void Dispatcher::work()
 	edge.fwd();
 	edge.bwd();
 	end = clock();
-	total_time += double((end - start)) / CLOCKS_PER_SEC;
+	time += double((end - start)) / CLOCKS_PER_SEC;
 
 	
 	std::cout << "solved edge\n";
@@ -97,9 +87,9 @@ void Dispatcher::work()
 	start = clock();
 	recv_block_sols();
 	end = clock();
-	total_time += double((end - start)) / CLOCKS_PER_SEC;
+	time += double((end - start)) / CLOCKS_PER_SEC;
 	
-	std::cout << "elapsed " << total_time << '\n';
+	std::cout << "elapsed " << time << '\n';
 	//std::cout << "recved block solns\n";
 		
 	std::cout << "\n\n";

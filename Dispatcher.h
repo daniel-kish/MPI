@@ -25,6 +25,7 @@ struct Dispatcher
 	std::vector<Block> bs;
 	std::vector<double> soln;
 	std::vector<double> Rhs;
+	double time;
 
 	Dispatcher(int block_sz, int blocks_nr, int edge_sz);
 	void work();
