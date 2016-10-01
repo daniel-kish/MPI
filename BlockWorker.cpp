@@ -8,27 +8,35 @@ BlockWorker::BlockWorker(int _block_sz, int _blocks_nr, int _edge_sz)
 {
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 	MPI_Comm_size(MPI_COMM_WORLD, &world_sz);
+	time=0.0;
 	
-/*	if (world_sz-1 != blocks_nr) // not enough or too many processes
+	if (world_sz-1 != blocks_nr) // not enough or too many processes
 		throw BlockWorkerError("not enough processes");
-		*/
+		
 }
 
 void BlockWorker::work()
 {
+	clock_t start, end;
 	Block bl = recv_block();
-
-//	MPI_Request* reqs = new MPI_Request[b.rows];	
 
 	for(int i = 0; i < bl.rows; ++i)
 	{
-		send_row(bl,i/*,reqs+i*/);
+		start = clock();
+		send_row(bl,i);
+		end  = clock();
+		time += double(end-start) / CLOCKS_PER_SEC;
 		bl.fwd(i);
 	}
-//	MPI_Waitall(b.rows, reqs, MPI_STATUS_IGNORE);
+
 	std::vector<double> v = recv_edge_sol();
 
+
+	start = clock();
 	bl.bwd(v);
+	end  = clock();
+	time += double(end-start) / CLOCKS_PER_SEC;
+	std::cout << "block "<< time << '\n';
 	send_block_sol(bl);
 }
 

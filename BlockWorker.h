@@ -21,6 +21,7 @@ struct BlockWorker
 	int myrank;
 	int world_sz;
 
+	double time;
 
 	BlockWorker(int block_sz, int blocks_nr, int edge_sz);
 	void work();

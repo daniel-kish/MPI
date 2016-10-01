@@ -35,7 +35,7 @@ void Dispatcher::elim_row(Row & r, int& col_tobe_elimd)
 void Dispatcher::work()
 {
 	dispatchBlocks();
-	std::cout << "dispatched blocks\n";
+	//std::cout << "dispatched blocks\n";
 	std::priority_queue<Row> q;
 	
 	int rows_nr = blocks_nr * block_sz;
@@ -69,7 +69,7 @@ void Dispatcher::work()
 		std::cerr << "fatal error: q not empty\n";
 		std::terminate();
 	}
-	std::cout << "recved rows\n";
+	//std::cout << "recved rows\n";
 
 	start = clock();
 	edge.fwd();
@@ -78,27 +78,27 @@ void Dispatcher::work()
 	time += double((end - start)) / CLOCKS_PER_SEC;
 
 	
-	std::cout << "solved edge\n";
+	//std::cout << "solved edge\n";
 
 	send_edge_sol();
 	
-	std::cout << "sent edge sol\n";
+	//std::cout << "sent edge sol\n";
 	
 	start = clock();
 	recv_block_sols();
 	end = clock();
 	time += double((end - start)) / CLOCKS_PER_SEC;
 	
-	std::cout << "elapsed " << time << '\n';
+	std::cout << "disp " << time << '\n';
 	//std::cout << "recved block solns\n";
 		
-	std::cout << "\n\n";
+	//std::cout << "\n\n";
 	std::vector<double> rhs = mult(bs, edgeInit, soln);
 	
 	double residue=0.0;
 	for (int i=0; i < rhs.size(); ++i)
 		residue += fabs(rhs[i] - Rhs[i]);
-	std::cout << residue << '\n';
+	//std::cout << residue << '\n';
 }
 
 void Dispatcher::recv_block_sols()
